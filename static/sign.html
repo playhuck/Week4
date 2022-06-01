@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!--폰트-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Gaegu:wght@700&family=Gothic+A1:wght@200&family=Nanum+Gothic+Coding&family=Poor+Story&display=swap"
+        rel="stylesheet">
+    <!--Bulma추가-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <!-- Font Awesome CSS 이거 추가 안해줫었어서 로그인화면 옆 아이콘이 안보였었음-->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!--JQuery 임포트-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+
+    <title> Blog 회원가입 </title>
+    <style>
+        * {
+            font-family: 'Poor Story', cursive;
+        }
+
+        .wrap {
+            width: 100vw;
+            height: 100vh;
+            /*background: pink;*/
+        }
+
+        .titles {
+            position: static;
+        }
+
+        .title {
+
+            /*display: flex;*/
+            /*justify-content: center;*/
+            /*align-items: center;*/
+            position: relative;
+            top: 60px;
+            font-size: 5rem;
+            margin-top: auto;
+            font-family: 'Do Hyeon', sans-serif;
+            color: #f32645;
+            font-weight: 800;
+
+        }
+
+        .subtitle {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            color: black;
+        }
+
+        .section {
+            padding: 1rem 1.5rem;
+            max-width: 750px;
+            margin: auto;
+        }
+
+        .is-sparta {
+            color: #e8344e !important;
+        }
+
+        .button.is-sparta {
+            background-color: #e8344e;
+            border-color: transparent;
+            color: #fff !important;
+        }
+
+        .button.is-sparta.is-outlined {
+            background-color: transparent;
+            border-color: #e8344e;
+            color: #e8344e !important;
+        }
+
+        .help {
+            color: gray;
+        }
+    </style>
+    <script>
+        function is_nickname(asValue) {
+            /*  /^는 정규식의 시작을 , $/는 정규식의 끝을 알린다. */
+            /* 소괄호()는 반드시 들어가야 하는것 , 대괄호[] 는 */
+            /* {}는 입력숫자 제한*/
+            var regExp = /^(?=.*[a-zA-Z])[-a-zA-Z0-9_.]{3,20}$/;
+            return regExp.test(asValue);
+        }
+
+        function sign_up() {
+            let nickname = $('#input-username').val();
+            let password = $('#input-password').val();
+            let confirm_pw = $('#input-password2').val();
+        
+        $.ajax({
+            type: "POST",
+            url: "/api/users",
+            data: {
+                nickname: nickname,
+                password: password,
+                confirm_pw: confirm_pw
+
+            },
+            error: function(response) {
+                console.log(response, "닉네임 또는 패스워드를 확인해주세요")
+            },
+            success: function (response) {
+                alert("Sign Up!");
+                window.location.href ='/login.html';
+            },
+            
+
+        })
+        }
+    </script>
+</head>
+<div class="wrap">
+    <div class="hero-body has-text-centered" style="background-color: white; padding-bottom:1rem;margin:auto; ">
+
+        <div class="titles">
+            <h1 class="title">회원가입</h1>
+        </div>
+    </div>
+    <div class="login-main">
+        <section class="section">
+            <div class="container">
+                <div class="box" style="max-width: 480px; margin:auto">
+                    <article class="media">
+                        <div class="media-content">
+                            <div class="content">
+                                <div class="upper-sign-up has-text-centered">
+                                </div>
+                                <div class="field has-addons">
+                                    <div class="control has-icons-left" style="width:100%">
+                                        <input id="input-username" class="input" type="text" placeholder="nickname">
+                                        <span class="icon is-small is-left"><i class="fa fa-user"></i></span>
+                                    </div>
+                                    <div id="btn-check-dup" class="control is-hidden">
+                                        <button class="button is-sparta" onclick="check_dup()">중복확인</button>
+                                    </div>
+
+                                </div>
+                                <p id="help-id">아이디는 영문과 숫자와 일부 문자만 입력 가능합니다.</p>
+                                <p id="help-id-login" class="help is-danger"></p>
+                                <div class="field">
+                                    <div class="control has-icons-left">
+                                        <input id="input-password" class="input" type="password" placeholder="password">
+                                        <span class="icon is-small is-left"><i class="fa fa-lock"></i></span>
+                                    </div>
+                                    <p id="help-password">영문과 숫자 조합의 3-20자의 비밀번호를 설정해주세요.
+                                        특수문자(!@#$%^&*)도
+                                        사용 가능합니다.</p>
+                                    <p id="help-password-login" class="help is-danger"></p>
+                                </div>
+                                <div id="sign-up-box">
+                                    <div class="mb-5">
+                                        <div class="field">
+                                            <div class="control has-icons-left" style="width:100%">
+                                                <input id="input-password2" class="input" type="password"
+                                                    placeholder="confirm password">
+                                                <span class="icon is-small is-left"><i class="fa fa-lock"></i></span>
+                                            </div>
+                                            <p id="help-password2">비밀번호를 다시 한 번 입력해주세요.</p>
+                                        </div>
+                                    </div>
+                                    <nav class="level is-mobile">
+                                        <button class="level-item button is-sparta" onclick="sign_up()">
+                                            회원가입
+                                        </button>
+                                        <button class="level-item button is-sparta is-outlined"
+                                            onclick="window.location.href='/'">
+                                            취소
+                                        </button>
+                                    </nav>
+                                    </body>
+
+</html>

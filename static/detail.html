@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.4.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+
+
+    <title>Detail list</title>
+    <script>
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const postId = urlParams.get("postId");
+
+        $(document).ready(function () {
+            Getpost();
+        })
+
+        function Getpost() {
+
+            $.ajax({
+                type: "GET",
+                url: '/api/posts/' + postId,
+                data: {},
+                success: function (response) {
+
+                    let posts = response.num
+                    console.log(posts)
+                    let temp_html = `
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">제목</span>
+                        <div type="text" class="form-control" placeholder="${posts.title}" aria-label="Username"
+                            aria-describedby="basic-addon1" value="${posts.title}">${posts.title}</div>
+                    </div>
+                    작성자명
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">작성자</span>
+                        <div type="text" class="form-control" placeholder="작성자" aria-label="Username"
+                            aria-describedby="basic-addon1">${posts.name}</div>
+                    </div>
+                    날짜
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">날짜</span>
+                        <div type="text" class="form-control" placeholder="비밀번호" aria-label="Username"
+                            aria-describedby="basic-addon1">${posts.date}</div>
+                    </div>
+                    내용
+                    <div class="input-group">
+                        <span class="input-group-text">내용</span>
+                        <textarea class="form-control" aria-label="With textarea" id="contents">${posts.contents}</textarea>
+                    </div>
+                    비밀번호
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">비밀번호</span>
+                        <input type="text" class="form-control" value="" aria-label="Username"
+                            aria-describedby="basic-addon1" id="password">
+                    </div>
+                    <div id="form-commentInfo">
+                        <div id="nick"><span id="count"></span></div>
+                        <input id="comment" placeholder="댓글을 입력해 주세요.">
+                        <button id="submit" onclick="comment()">등록</button>
+                    </div>
+                    `
+                    $('#box').append(temp_html);
+
+
+
+                }
+            })
+        }
+        function Update() {
+
+            let title = $('#title').val()
+            let name = $('#name').val()
+            let date = $('#date').val()
+            let contents = $('#contents').val()
+            let password = $('#password').val()
+
+            $.ajax({
+                type: "PUT",
+                url: "/api/posts/" + postId,
+                headers: {
+                    authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                data: {
+                    postId: postId,
+                    title: title,
+                    name: name,
+                    password: password,
+                    contents: contents
+                },
+                success: function (response) {
+                    alert(response['msg'])
+                    window.location.href = "/main.html"
+                }
+            })
+        }
+        function Delete() {
+
+            let title = $('#title').val()
+            let name = $('#name').val()
+            let date = $('#date').val()
+            let contents = $('#contents').val()
+            let password = $('#password').val()
+
+            $.ajax({
+                type: "DELETE",
+                url: "/api/posts/" + postId,
+                headers: {
+                    authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                data: {
+                    postId: postId,
+                    title: title,
+                    name: name,
+                    password: password,
+                    contents: contents
+                },
+                success: function (response) {
+                    alert(response['msg'])
+                    window.location.href = "/main.html"
+                }
+            })
+        }
+        function comment() {
+            
+            let comment = $('#comment').val();
+
+            $.ajax({
+                type:"POST",
+                url:"/api/comments/"+ postId,
+                headers: {
+                    authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                data:{
+                    "comment": comment,
+                },
+                success: function (response) {
+                    console.log(response);
+                    alert("comment on!");
+                    window.location.reload();
+                },
+                    // data가 성공적으로 실행됬을 때 실행될 부분
+                    // post 메서드를 읽을 때는 body의 id or name 속성 값으로 읽는다.
+                    error: function (xhr, status, error) {
+                    if (status == 401) {
+                        alert("로그인이 필요합니다.");
+                    } else {
+                        localStorage.clear();
+                        alert("알 수 없는 문제가 발생했습니다. 관리자에게 문의하세요.");
+                    }
+                    window.location.href = "/";
+                
+            }
+        })
+    
+    }
+    // function commRead() {
+       
+    //     $.ajax({
+    //         type:"GET",
+    //         url:"/api/comments/" +postId,
+    //         data:{},
+    //         success: function (response){
+    //             let comments = response.comm;
+
+    //             for(let i=0; i < comments.length; i++) {
+    //                 let comment = comments[i].comment;
+    //                 let nickname = comments[i].nickname;
+
+    //                 let temp_html = ` <div class="input-group">
+    //                     <span class="input-group-text" id="nickname">${comments.nickname}</span>
+    //                     <textarea class="form-control" aria-label="With textarea" id="comment">${comments.comment}</textarea>
+    //                 </div>`
+    //             }
+    //         }
+    //     })
+    // }
+        
+    </script>
+    <style>
+        .test {
+            color: brown;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test"></div>
+
+    <div id="box">
+        <!-- 제목
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">제목</span>
+            <input type="text" class="form-control" placeholder="제목" aria-label="Username"
+                aria-describedby="basic-addon1">
+        </div>
+        작성자명
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">작성자</span>
+            <input type="text" class="form-control" placeholder="작성자" aria-label="Username"
+                aria-describedby="basic-addon1">
+        </div>
+        비밀번호
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">비밀번호</span>
+            <input type="text" class="form-control" placeholder="비밀번호" aria-label="Username"
+                aria-describedby="basic-addon1">
+        </div>
+        내용
+        <div class="input-group">
+            <span class="input-group-text">내용</span>
+            <textarea class="form-control" aria-label="With textarea"></textarea>
+        </div>
+        글쓰기  -->
+        <button type="button" class="btn btn-dark" onclick="Update()">수정하기</button>
+        <button type="button" class="btn btn-dark2" onclick="Delete()">삭제하기</button>
+        <button type="button" class="btn btn-dark3" onclick="window.location.href='/main.html'">목록으로 돌아가기</button>
+        <button id="submit" onclick="comment()">댓글 등록</button>
+
+
+
+    </div>
+
+</body>
+
+</html>
