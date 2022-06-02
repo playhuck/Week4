@@ -64,6 +64,9 @@
             $.ajax({
                 type: "GET",
                 url: '/api/posts', //get방식으로 받아올 루트파일의 경로
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                },
                 data: {},
                 success: function (response) {
                     console.log(response.post);

@@ -24,7 +24,7 @@ const Postschema = new mongoose.Schema({
     password: {
         type: String,
         required: true
-    }
+    },
 });
 
 module.exports = mongoose.model("Post", Postschema);

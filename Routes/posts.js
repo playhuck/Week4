@@ -44,27 +44,48 @@ router.post('/posts' ,authMiddleware ,async (req, res) => {
     const user= res.locals.user.nickname;
     console.log(user)
 
+    if(user) {
     const createPost = await Post.create({ title, contents, date, password, name,author:user});
-
     res.send({ posts :  createPost });
+    } else if (!user){
+        res.status(401).json({msg: "로그인이 필요한 기능입니다."})
+    }
+    
        
 });
+
+// 댓글 목록    
+router.get('/comments/:postId', authMiddleware, async (req, res) => {
+    const { postId } = req.params;
+    const { comment} = req.body;
+    await Post.findOne({_id:postId})
+    const comm = await Comm.find({Id:postId, comment:comment})
+    .sort('-commentId').exec();
+    
+    
+    res.send({comm});
+    
+})
 
 // post 루트 파일을 exports 해주지 않았기 때문에 폼 데이터를 받기만 하지
 // db로 보내주지 못하고 있었다. 게시물 등록 코드자체는 완성
 
 // 댓글 작성
-router.post('/comments/:commId', authMiddleware, async (req, res) => {
-    const { commId } = req.params
-    const { comment, Id} = req.body; 
-    const user = res.locals.user;
-    console.log(user);
+router.post('/comments/:postId', authMiddleware, async (req, res) => {
+    const { postId } = req.params;
+    const { comment, commentId} = req.body; 
+    const nickname = res.locals.user.nickname;
+    console.log(postId)
+    const post = await Post.findOne({_id:postId})
+    console.log(post)
 
-    const createComm = await Comm.create({ comment, Id, commId, author:user.nickname})
+    const createComm = await Comm.create
+    ({ comment:comment, commentId:commentId, Id: post._id, nickname})
 
     res.send({comments : createComm});
+    
+});
 
-})
 
 router.put("/posts/:postId",authMiddleware, async (req, res) => {
     const { postId } = req.params;
@@ -122,4 +143,64 @@ router.delete("/posts/:postId",authMiddleware, async(req, res) => {
     res.json({ success: true, msg: 'Delete!' });
 });
 
+router.delete('/comments/:commentId', authMiddleware, async (req, res) => {
+    const { commentId } = req.params;
+    const { user } = res.locals.user;
+    
+    const [existComm] = await Comm.find({_id:commentId});
+    const [Users] = await User.find({_id:user})
+    console.log(Users);
+    console.log(existComm);
+    
+    if (Users.nickname === existComm.nickname) {
+        await Comm.deleteOne({_id:commentId});
+        res.json({ msg : "success"});
+    } else {
+        return res.status(401).json({
+            success: false,
+            errormessage: '작성자만 삭제할 수 있습니다.',
+        });
+    }
+})
+
+router.patch('/comments/:commentId', authMiddleware, async (req, res) => {
+    const { commentId } = req.params;
+    const { userId } = res.locals.user;
+    const { comment } = req.body;
+
+    const [existComm] = await Comm.find({_id:commentId});
+    const [Users] = await User.find({_id:userId})
+
+    if(Users.nickname === existComm.nickname) {
+        await Comm.findByIdAndUpdate({_id:commentId}, {$set: {comment}});
+        res.json({ msg: "success"});
+    } else {
+        return res.status(401).json({
+            success: false,
+            errormessage: '작성자만 수정할 수 있습니다.',
+        });
+    }
+   
+})
 module.exports = router;
+
+// router.put("/posts/:postId",authMiddleware, async (req, res) => {
+//     const { postId } = req.params;
+
+//     const { title,contents, password } = req.body
+//     let user = res.locals.user.nickname;
+    
+//     const existsPost = await Post.find({ _id: postId, password:password});
+
+//     console.log(existsPost[0]['author'])
+//     if (user === existsPost[0]['author']) {
+//         await Post.findOneAndUpdate({ _id: postId }, {$set: {title, contents}});
+//     } else {
+//         return res.status(401).json({
+//             success: false,
+//             errormessage: '작성자만 삭제할 수 있습니다.',
+//         });
+//     }
+
+//     res.json({ success: true, msg: 'Update!' });
+// });
